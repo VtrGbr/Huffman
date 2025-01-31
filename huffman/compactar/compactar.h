@@ -42,6 +42,21 @@ Caso 2: A fila nao estah mais vazia,vamos ter que verificar se o elemento que qu
 Caso 3: O noh a ser inserido vai ficar no meio ou no fim
 */
 
-void fila_ordem(Fila* queue, No* no);
+void fila_prioridade(Fila* queue, No* no);
+
+void tabela_frequencia( const char* nome_arquivo,ulli frequencia[TAM]);
+
+void preencher( Fila* queue, ulli *table);
+
+No* dequeue(Fila* queue);
+
+No* gerar_arvore(Fila* queue);
+
+void imprimir_frequencia( ulli frequencia[TAM]);
+
+void imprimir_arvore(No* raiz);
+
+
+void imprimir_fila(Fila* queue);
 
 #endif
