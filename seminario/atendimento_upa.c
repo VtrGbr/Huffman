@@ -24,6 +24,7 @@ Fila* criar_fila() {
     return fila;
 }
 
+//Essa funcao transforma a string da pulseira em numero para podermos adicionar na fila
 int numero_urgencia(char* urgencia) {
     if (strcmp(urgencia, "vermelho") == 0) return 1;
     else if (strcmp(urgencia, "laranja") == 0) return 2;
@@ -33,7 +34,7 @@ int numero_urgencia(char* urgencia) {
     return 10; // caso seja digitado algo errado, não quero que ele seja o primeiro a estar na fila
 }
 
-
+//Nessa função ela transforma o numero da urgencia em string para podermos imprimir no "telao"
 char* nome_urgencia(int urgencia) {
     switch(urgencia){
         case 1: return "emergencia";
@@ -45,6 +46,7 @@ char* nome_urgencia(int urgencia) {
     }
 }
 
+//Criamos um noh para o paciente, para evitar estar colocando valores demais em uma funcao
 Paciente* criar_paciente(char *nome, int urgencia, int cartao_sus) {
     Paciente* pacient = (Paciente*)malloc(sizeof(Paciente));
     if (pacient == NULL) {
@@ -58,6 +60,7 @@ Paciente* criar_paciente(char *nome, int urgencia, int cartao_sus) {
     return pacient;
 }
 
+//Adicionamos de maneira prioritaria na fila, de maneira crescente
 void adicionar(Fila* fila, Paciente* paciente) {
     if (fila->inicio == NULL || paciente->urgencia < fila->inicio->urgencia) {
         paciente->prox = fila->inicio;
@@ -72,6 +75,7 @@ void adicionar(Fila* fila, Paciente* paciente) {
     }
 }
 
+//Removemos um paciente para que ele seja atendido
 Paciente* remover(Fila* fila) {
     if (fila == NULL || fila->inicio == NULL) {
         printf("Fila vazia!\n");
@@ -83,9 +87,10 @@ Paciente* remover(Fila* fila) {
     return removido;
 }
 
+//Imprimir um paciente
 void imprimir(Fila* fila) {
     Paciente* atual = fila->inicio;
-    if(atual == NULL){
+    if(atual == NULL){ // Caso a fila esteja vazia
         printf("Nao ha pacientes a serem atendidos!\n");
     }else{
         while (atual != NULL) {
