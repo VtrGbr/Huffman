@@ -1,5 +1,5 @@
 #include "descompactar.h"
-#include "compactador.h"
+//#include "compactar.h"
 
 
 // Função para abrir um arquivo, solicitando o nome ao usuário
@@ -74,6 +74,9 @@ int bit_esta_definido_descompactar(unsigned int caractere, int posicao)
     return (mascara & caractere);
 }
 
+
+/*Esta função é responsável por ler os dados compactados de um arquivo, navegar na árvore de Huffman reconstruída com base nos bits lidos, 
+e escrever os bytes descompactados em outro arquivo.*/
 void descompactar(FILE *arquivo_entrada, unsigned int tamanho_lixo, int tamanho_arvore, no_t *arvore_huff, FILE *arquivo_saida) 
 {
     if (tamanho_arvore == 0) 
@@ -95,7 +98,8 @@ void descompactar(FILE *arquivo_entrada, unsigned int tamanho_lixo, int tamanho_
     total_bytes = ftell(arquivo_entrada);
 
     //Posiciona o ponteiro do arquivo logo após os dois primeiros bytes do cabeçalho (tamanho da arvore e lixo) e o trecho que representa a árvore de Huffman.
-    //Esse ponto marca o início dos dados compactados no arquivo.
+    //Esse ponto marca o início dos dados compactados no arquivo, pois temos no comeco 2 bytes que sao
+    // para o lixo e o tamanho da arvore, entao os dados compactados comecam depois desses dois bytes.
     fseek(arquivo_entrada, (2 + tamanho_arvore), 0);
 
 
@@ -103,6 +107,7 @@ void descompactar(FILE *arquivo_entrada, unsigned int tamanho_lixo, int tamanho_
     byte_atual = getc(arquivo_entrada);
 
     //Ler os cada bytes dos dados compactados, um por um, ate o penultimo byte
+    //Lembrete: cada bit determina para onde viajaremos na arvore( 1 - direita, 0 - esquerda)
     for (bytes = (2 + tamanho_arvore); bytes < (total_bytes - 1); bytes++) 
     {
         // Para cada byte, vamos processar cada bit individualmente, do mais significativo "posição 7" ao menos significativo "posição 0".
@@ -245,6 +250,7 @@ unsigned int *obter_array_arvore(FILE *arquivo_entrada, unsigned int tamanho_arv
     return (array_arvore); 
 }
 
+//Esse é um ponteiro para ponteiro porque a função vai avançando dentro do array à medida que processa os nós.
 no_t *construir_arvore(unsigned int **array_arvore) 
 {
     //Achamos um no interno, e terah filhos na esquerda e na direita
@@ -253,14 +259,18 @@ no_t *construir_arvore(unsigned int **array_arvore)
         no_t *esquerda;
         (*array_arvore)++;  //nos movemos para o proximo caracter, pois queremos "sair" do  *, ja que ele ja foi processado
         //"Viajamos" para a esquerda
-        esquerda = construir_arvore(array_arvore);
-        (*array_arvore)++; //Ja que processamos o filho esquerdo, vamos para o proximo elemento
+        esquerda = construir_arvore(array_arvore); // "Viajamos" para a esquerda, pois estamos percorrendo em pre-ordem, entao o filho da esquerda
+        //vem primeiro
+        (*array_arvore)++; //Avança de novo no array após processar a subárvore esquerda, indo agora para o lado direito.
+        
+        //Cria um nó com o caractere '*' (nó interno), com os dois filhos — o esquerdo já construído e o direito retornado pela chamada recursiva.
         return (criar_no('*', esquerda, construir_arvore(array_arvore)));
     }
     //Este noh eh uma folha
-    else if (**array_arvore == '\\') 
+    else if (**array_arvore == '\\') //é um caractere de escape, usado para distinguir caracteres especiais como '*' ou '\\' usados como dados reais (folhas).
     {
         *array_arvore = (*array_arvore + 1); //Incrementamos para o proximo valor que serah interpretado literalmente
+                                            // Ou seja,Avança para o próximo valor, que serah o caractere real da folha, como '*' ou '\\'.
         return (criar_no(**array_arvore, NULL, NULL));
     }
 
@@ -268,21 +278,24 @@ no_t *construir_arvore(unsigned int **array_arvore)
     return (criar_no(**array_arvore, NULL, NULL)); 
 }
 
+//Reconstroi a estrutura de nos que representa a arvore na memoria, tendo em vista que ela pega a arvore do arquivo que esta de forma seriada (impressa em pre-ordem)
 no_t *obter_arvore(FILE *arquivo_entrada, unsigned int tamanho_arvore) 
 {
-    if (tamanho_arvore == 0) 
+    if (tamanho_arvore == 0) //	Verifica se ha arvore a reconstruir
     {
         return NULL;
     }
 
-    unsigned int *array_arvore = obter_array_arvore(arquivo_entrada, tamanho_arvore);
-    unsigned int *array_arvore_auxiliar = array_arvore;
+    unsigned int *array_arvore = obter_array_arvore(arquivo_entrada, tamanho_arvore); //	Lê os dados serializados da arvore do arquivo
+    /*Esse ponteiro é guardado para que possamos depois liberar corretamente a memória alocada com free, 
+    pois a função construir_arvore irá modificar array_arvore (passado por referência como ponteiro para ponteiro).*/
+    unsigned int *array_arvore_auxiliar = array_arvore; 
 
-    no_t *raiz_arvore = construir_arvore(&array_arvore);
+    no_t *raiz_arvore = construir_arvore(&array_arvore); //Constrói a arvore recursivamente a partir do array
 
     free(array_arvore_auxiliar);
 
-    return (raiz_arvore);
+    return (raiz_arvore); //A função retorna a raiz da arvore de Huffman que foi reconstruída a partir da serialização.
 }
 
 FILE* remover_huff(char nome[])
