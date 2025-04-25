@@ -41,4 +41,7 @@ void imprimir(Fila* fila);
 //Uma tela simples de menu
 void menu();
 
+//Funcao recebe uma fila e libera o espaco dela
+void liberar_fila(Fila* fila);
+
 #endif

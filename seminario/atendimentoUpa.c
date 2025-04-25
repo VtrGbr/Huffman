@@ -91,6 +91,17 @@ void menu(){
     printf("Digite as opcoes de atendimento:\n-adicionar: Adicionar pessoa na fila de atendimento;\n-atender: atenderemos um paciente;\n-imprimir: Imprimir as pessoas da fila\n-finalizar: Finalizar o programa;\n");
 }
 
+//Libera uma fila
+void liberar_fila(Fila* fila) {
+    Paciente* aux = fila->inicio;
+    while (aux != NULL) {
+        Paciente* temp = aux;
+        aux = aux->prox;
+        free(temp);
+    }
+    fila->inicio = NULL; // para evitar um acesso indevido na memoria
+}
+
 
 int main() {
     Fila* upa = criar_fila();
@@ -129,6 +140,8 @@ int main() {
         }
         printf("\n");
     } while (strcmp(opcao, "finalizar") != 0);
+
+    liberar_fila(upa);
 
     return 0;
 }
