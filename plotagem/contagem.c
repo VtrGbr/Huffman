@@ -98,7 +98,7 @@ void inserir_heap(Heap* heap, int valor){
         while (i > 0)
         {
             //a função "pegar_pai" calcula o índice do nó pai de i na heap. Essa função geralmente usa i / 2 para encontrar o pai do índice i.
-            int pai = pegar_pai(heap,heap->tamanho); 
+            int pai = pegar_pai(heap,i); 
             heap->comparacoes++; // contador de comparacoes para o grafico
 
             //Se o valor atual "heap->valores[i]" for maior ou igual ao valor do nó pai "heap->valores[pai]", o loop para. Isso acontece porque a heap está organizada corretamente quando os valores dos filhos são maiores ou iguais aos do pai em uma heap.
