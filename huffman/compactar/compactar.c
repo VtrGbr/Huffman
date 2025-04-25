@@ -1,5 +1,6 @@
 #include "compactar.h"
 
+#define tam 256
 //Tabela de frequencia
 
 //Criar fila
@@ -202,19 +203,272 @@ No* gerar_arvore(Fila* queue){
     return dequeue(queue);
 }
 
+void tabela_de_codigo(char *tb_codigo[], No *arvore, char *caminho)
+{
+    if (arvore == NULL) return;
 
+    // Caso base: nó folha
+    if (arvore->esq == NULL && arvore->dir == NULL) {
+        tb_codigo[*(unsigned char*)arvore->byte] = strdup(caminho);
+        return;
+    }
+
+    // Caminho para esquerda: adiciona '0'
+    char caminho_esq[TAM];
+    strcpy(caminho_esq, caminho);
+
+    strcat(caminho_esq, "0");
+    tabela_de_codigo(tb_codigo, arvore->esq, caminho_esq);
+
+    // Caminho para direita: adiciona '1'
+    char caminho_dir[TAM];
+    strcpy(caminho_dir, caminho);
+    strcat(caminho_dir, "1");
+    tabela_de_codigo(tb_codigo, arvore->dir, caminho_dir);
+}
+
+ulli contar_bits_totais(const char* nome_arquivo, char** tabela_codigos) {
+    FILE* arquivo = fopen(nome_arquivo, "rb"); // leitura binária
+    if (!arquivo) {
+        perror("Erro ao abrir o arquivo");
+        return 0;
+    }
+
+    ulli total_bits = 0;
+    int byte;
+
+    while ((byte = fgetc(arquivo)) != EOF) {
+        // Fazemos um cast para unsigned char para garantir que o valor do byte esteja entre 0 e 255,
+        // evitando acessos inválidos fora do vetor tabela_codigos (que tem tamanho 256).
+        unsigned char c = (unsigned char)byte;
+        if (tabela_codigos[byte] != NULL) {
+            total_bits += strlen(tabela_codigos[byte]);
+        } else {
+            // Caso não tenha código para esse byte, pode ser um erro
+            fprintf(stderr, "Aviso: byte %d não tem código na tabela.\n", byte);
+        }
+    }
+
+    fclose(arquivo);
+    return total_bits;
+}
+
+void obter_extensao(const char* nome_arquivo, char* extensao) {
+    // Encontra o último ponto no nome do arquivo
+    const char* ponto = strrchr(nome_arquivo, '.');
+    if (ponto != NULL) {
+        // Copia a extensão para a variável fornecida
+        strcpy(extensao, ponto + 1); // +1 para pular o ponto
+    } else {
+        // Se não houver ponto, define uma string vazia ou um valor padrão
+        strcpy(extensao, ""); // ou "sem_extensao"
+    }
+}
+
+// Função para escrever a árvore de Huffman no arquivo em pré-ordem
+// Utiliza '*' para nós internos e '\' como caractere de escape
+void escrever_arvore(FILE *arquivo, No *raiz) {
+    // Caso base: se o nó for nulo, não faz nada
+    if (raiz == NULL) return;
+
+    // Verifica se o nó é uma folha (sem filhos)
+    if (raiz->esq == NULL && raiz->dir == NULL) {
+        // Converte o ponteiro void* para unsigned char (garante valores entre 0 e 255)
+        unsigned char c = *(unsigned char*)raiz->byte;
+
+        // Se o caractere da folha for '*' ou '\', precisamos escapá-lo
+        // para não confundir com os símbolos especiais usados na serialização
+        if (c == '*' || c == '\\') {
+            fputc('\\', arquivo);  // Escreve o caractere de escape antes
+        }
+
+        // Escreve o byte real da folha no arquivo
+        fputc(c, arquivo);
+    } else {
+        // Escreve '*' para indicar que este é um nó interno
+        fputc('*', arquivo);
+
+        // Chama recursivamente a função para os filhos esquerdo e direito
+        escrever_arvore(arquivo, raiz->esq);
+        escrever_arvore(arquivo, raiz->dir);
+    }
+}
+
+void escrever_cabecalho(FILE *arquivo, int bitsLixo, int tamanhoArvore, No* raiz) {
+    // Garantir que bitsLixo caiba em 3 bits e tamanhoArvore em 13 bits
+    if (bitsLixo > 7 || tamanhoArvore > 8191) {
+        fprintf(stderr, "Erro: bits de lixo ou tamanho da árvore fora do limite.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    // Montar os 16 bits do cabeçalho
+    unsigned short cabecalho = 0;
+
+    // Posicionar bits de lixo nos 3 bits mais significativos (13ª a 15ª posição)
+    cabecalho |= (bitsLixo << 13);
+
+    // Colocar o tamanho da árvore nos 13 bits menos significativos
+    cabecalho |= tamanhoArvore;
+
+    /*
+        Escrever os 2 bytes (16 bits) do cabeçalho no arquivo — big endian (MSB primeiro).
+        Fazemos isso para garantir que o arquivo seja lido corretamente em diferentes sistemas, 
+        visto que a ordem dos bytes pode variar entre arquiteturas (big-endian vs little-endian).
+    */
+    fputc((cabecalho >> 8) & 0xFF, arquivo);  // byte mais significativo
+    fputc(cabecalho & 0xFF, arquivo);         // byte menos significativo
+
+    
+}
+
+void escreber_extensao(FILE *arquivo, const char* extensao) {
+     // Validar o tamanho da extensão
+     int tamanhoExtensao = strlen(extensao);
+     if (tamanhoExtensao > 6) {
+         fprintf(stderr, "Erro: extensão do arquivo original é maior que 6 caracteres. Não é possível compactar.\n");
+         exit(EXIT_FAILURE);
+     }
+ 
+     // Byte com o tamanho da extensão e 5 bits de lixo
+     //Essa parte do código manipula o valor de tamanhoExtensao para garantir que ele ocupe apenas os três bits mais significativos de um byte.
+     /*
+     Por exemplo: Digamos que o tamanho da extensao seja 3 (00000011) e 0xE0 é 11100000
+                 A operacao que fazemos no "byteTamanhoExtensao" serve para colocar o tamanho da extensao nos 3 bits mais significativos e quando fazemos AND com o "0xE0" garantimos que os tres bits mais significativos serao preservados
+ 
+                 tamanhoExtensao << 5 : 00000011 << 5 = 01100000
+ 
+     */
+     unsigned char byteTamanhoExtensao = (tamanhoExtensao << 5) & 0xE0;  // Shift para os três primeiros bits
+     fputc(byteTamanhoExtensao, arquivo);
+ 
+     // Escrever a extensão do arquivo
+     fwrite(extensao, sizeof(char), tamanhoExtensao, arquivo);
+}
+
+void dados_compactados(const char* nome_arquivo, FILE* arquivo_compactado, char** tabela_codigos) {
+    FILE* arquivo = fopen(nome_arquivo, "rb"); // leitura binária
+    if (!arquivo) {
+        perror("Erro ao abrir o arquivo");
+        return;
+    }
+
+    int byte;
+    unsigned char buffer = 0; // Buffer para armazenar os bits
+    int posicao_buffer = 0;   // Posição atual no buffer
+
+    while ((byte = fgetc(arquivo)) != EOF) {
+        // Obtemos o código binário correspondente ao byte atual
+        char* codigo = tabela_codigos[byte];
+
+        // Adiciona cada bit do código ao buffer
+        for (int i = 0; codigo[i] != '\0'; i++) {
+            if (codigo[i] == '1') {
+                buffer |= (1 << (7 - posicao_buffer)); // Define o bit correspondente a 1
+            }
+            posicao_buffer++;
+
+            // Se o buffer estiver cheio, escreva-o no arquivo compactado
+            if (posicao_buffer == 8) {
+                fputc(buffer, arquivo_compactado);
+                buffer = 0; // Limpa o buffer
+                posicao_buffer = 0; // Reinicia a posição do buffer
+            }
+        }
+    }
+
+    // Se ainda houver bits no buffer, escreva-os no arquivo compactado
+    if (posicao_buffer > 0) {
+        fputc(buffer, arquivo_compactado);
+    }
+
+    fclose(arquivo);
+}
+
+int calcular_tamanho_arvore(No *raiz) {
+    if (raiz == NULL) return 0; // Árvore vazia não tem nós
+
+    return 1 + 
+           calcular_tamanho_arvore(raiz->esq) +
+           calcular_tamanho_arvore(raiz->dir);
+}
+
+
+void compactar_arquivo (const char* nome_arquivo_original, const char* nome_arquivo_compactado)
+{
+    //Passos;
+    /*
+        Passo 1: Gerar tabela de frequências
+        Passo 2: Criar fila de nós e gerar a árvore de Huffman
+        Passo 3: Gerar tabela de códigos
+        Passo 4: Calcular o tamanho do arquivo original e o tamanho do arquivo compactado
+    */
+
+    ulli frequencia[TAM] = {0};
+
+    //gerar a tabela de frequencia
+    tabela_frequencia(nome_arquivo_original, frequencia);
+
+    //Criar fila de nós 
+    Fila * fp = criar_fila(); 
+    preencher(fp, frequencia);
+
+    //gerar a árvore de Huffman
+    No * raiz=  gerar_arvore(fp);
+
+    //gerar tabela de códigos
+    char* tabela_codigos[TAM] = {0};
+    char caminho_na_arvore[TAM] = "";
+    tabela_de_codigo(tabela_codigos, raiz, caminho_na_arvore);
+
+    // calculando: tamanho do arquivo original, tamanho do arquivo compactado e lixo
+    ulli tam_aquivo = contar_bits_totais(nome_arquivo_original, tabela_codigos);
+    int bit_lixo= (8 - (tam_aquivo % 8)) % 8; // Calcula o número de bits de lixo
+    int tam_arvore = calcular_tamanho_arvore(raiz); // Tamanho da árvore em bits
+    ulli tam_aquivo_compactado = (tam_aquivo + bit_lixo) / 8; // Tamanho do arquivo compactado em bytes 
+
+    //Obtendo a extensão do arquivo original (jpg, png, txt, etc)
+    char extensao[5];
+    obter_extensao(nome_arquivo_original, extensao);
+
+
+    //criando o arquivo compactado
+    FILE* arquivo_compactado = fopen(nome_arquivo_compactado,"wb");
+    if( arquivo_compactado == NULL){
+        perror("Falha ao abrir o arquivo");
+        return;
+    }
+
+    //Escreve o cabeçalho do arquivo compactado
+    //O cabeçalho é composto por 16 bits: 3 bits de lixo e 13 bits para o tamanho da árvore 
+    //O tamanho da árvore é o número de nós na árvore de Huffman, que é o número total de bytes únicos no arquivo original
+    //O número de bits de lixo é o número de bits que não podem ser usados para armazenar dados úteis no arquivo compactado
+    escrever_cabecalho(arquivo_compactado, bit_lixo, tam_arvore, raiz);
+    escrever_arvore(arquivo_compactado, raiz); // Escreve a árvore no arquivo compactado;
+    //escreber_extensao(arquivo_compactado, extensao); // Escreve a extensão do arquivo original no arquivo compactado
+    
+    //Escreve os dados compactados no arquivo
+    dados_compactados(nome_arquivo_original, arquivo_compactado, tabela_codigos); // Função que escreve os dados compactados no arquivo
+
+    // Libere a memória da tabela de códigos
+    for (int i = 0; i < TAM; i++) {
+        if (tabela_codigos[i] != NULL) {
+            free(tabela_codigos[i]);
+        }
+    }
+
+
+}
 
 //--------------------------------Funcoes de debug---------------------------------------------------
 
 //Funcao para imprimir a tabela de frequencia
-void imprimir_frequencia( ulli frequencia[TAM]){
+/*void imprimir_frequencia( ulli frequencia[TAM]){
     for( int i = 0; i < TAM; i++){
         if( frequencia[i] > 0){
             printf("%c: %u\n", (uchar)i,frequencia[i]);
         }
     }
-}
-
+}*/
 //imprimir a arvore em pre-ordem
 void imprimir_arvore(No* raiz) {
     if (raiz == NULL) {

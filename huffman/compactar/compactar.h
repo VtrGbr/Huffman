@@ -52,6 +52,27 @@ No* dequeue(Fila* queue);
 
 No* gerar_arvore(Fila* queue);
 
+void tabela_de_codigo(char *tb_codigo[], No *arvore, char *caminho);
+
+ulli contar_bits_totais(const char* nome_arquivo, char** tabela_codigos);
+
+void obter_extensao(const char* nome_arquivo, char* extensao);
+
+void escrever_arvore(FILE *arquivo, No *raiz);
+
+
+void escrever_cabecalho(FILE *arquivo, int bitsLixo, int tamanhoArvore, No* raiz);
+
+void escreber_extensao(FILE *arquivo, const char* extensao);
+
+void dados_compactados(const char* nome_arquivo, FILE* arquivo_compactado, char** tabela_codigos);
+
+int calcular_tamanho_arvore(No *raiz);
+
+
+
+void compactar_arquivo (const char* nome_arquivo_original, const char* nome_arquivo_compactado);
+
 void imprimir_frequencia( ulli frequencia[TAM]);
 
 void imprimir_arvore(No* raiz);
