@@ -1,17 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-typedef struct paciente {
-    char nome[100];
-    int urgencia;
-    int cartao_sus;
-    struct paciente* prox;
-} Paciente;
-
-typedef struct fila {
-    Paciente* inicio;
-} Fila;
+#include "atendimentoUpa.h"
 
 // Criar uma fila
 Fila* criar_fila() {
