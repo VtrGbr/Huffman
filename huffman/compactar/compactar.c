@@ -427,8 +427,8 @@ void compactar_arquivo (const char* nome_arquivo_original, const char* nome_arqu
     ulli tam_aquivo_compactado = (tam_aquivo + bit_lixo) / 8; // Tamanho do arquivo compactado em bytes 
 
     //Obtendo a extensão do arquivo original (jpg, png, txt, etc)
-    char extensao[5];
-    obter_extensao(nome_arquivo_original, extensao);
+    //char extensao[5];
+    //obter_extensao(nome_arquivo_original, extensao);
 
 
     //criando o arquivo compactado
