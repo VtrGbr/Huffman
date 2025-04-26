@@ -69,11 +69,12 @@ void dados_compactados(const char* nome_arquivo, FILE* arquivo_compactado, char*
 
 int calcular_tamanho_arvore(No *raiz);
 
+//colocamos a extesao .huff no arquivo que queremos compactar
+char* adicionar_extensao(const char* nome_base, const char* extensao) ;
 
+void compactar_arquivo (const char* nome_arquivo_original);
 
-void compactar_arquivo (const char* nome_arquivo_original, const char* nome_arquivo_compactado);
-
-void imprimir_frequencia( ulli frequencia[TAM]);
+//void imprimir_frequencia( ulli frequencia[TAM]);
 
 void imprimir_arvore(No* raiz);
 

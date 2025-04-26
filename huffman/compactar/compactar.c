@@ -391,9 +391,25 @@ int calcular_tamanho_arvore(No *raiz) {
            calcular_tamanho_arvore(raiz->esq) +
            calcular_tamanho_arvore(raiz->dir);
 }
+//Serve para colocar a extensao .huff no arquivo
+char* adicionar_extensao(const char* nome_base, const char* extensao) {
+    // Calcula o tamanho necessário para o nome + a extensão + '\0'
+    size_t tamanho = strlen(nome_base) + strlen(extensao) + 1;
 
+    // Aloca memória para o nome completo
+    char* nome_completo = (char*)malloc(tamanho);
+    if (nome_completo == NULL) {
+        perror("Erro ao alocar memória");
+        return NULL;
+    }
 
-void compactar_arquivo (const char* nome_arquivo_original, const char* nome_arquivo_compactado)
+    // Cria o nome completo (nome + extensão)
+    snprintf(nome_completo, tamanho, "%s%s", nome_base, extensao);
+
+    return nome_completo;
+}
+
+void compactar_arquivo (const char* nome_arquivo_original)
 {
     //Passos;
     /*
@@ -432,7 +448,11 @@ void compactar_arquivo (const char* nome_arquivo_original, const char* nome_arqu
 
 
     //criando o arquivo compactado
-    FILE* arquivo_compactado = fopen(nome_arquivo_compactado,"wb");
+    char arquivo[256];
+    strcpy(arquivo,nome_arquivo_original);
+    char* nome_arquivo_com_extensao = adicionar_extensao(arquivo,".huff"); // ajuste o tamanho conforme necessário
+    
+    FILE* arquivo_compactado = fopen(nome_arquivo_com_extensao,"wb");
     if( arquivo_compactado == NULL){
         perror("Falha ao abrir o arquivo");
         return;
@@ -455,6 +475,8 @@ void compactar_arquivo (const char* nome_arquivo_original, const char* nome_arqu
             free(tabela_codigos[i]);
         }
     }
+
+    fclose(arquivo_compactado); // fechar o arquivo compactado
 
 
 }
