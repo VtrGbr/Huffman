@@ -384,12 +384,31 @@ void dados_compactados(const char* nome_arquivo, FILE* arquivo_compactado, char*
     fclose(arquivo);
 }
 
-int calcular_tamanho_arvore(No *raiz) {
-    if (raiz == NULL) return 0; // Árvore vazia não tem nós
+// Função para calcular o tamanho da árvore de Huffman 
+int calcular_tamanho_arvore(No *raiz) 
+{
+    if (raiz == NULL)  return 0; // Árvore vazia ou posicao nula
 
-    return 1 + 
-           calcular_tamanho_arvore(raiz->esq) +
-           calcular_tamanho_arvore(raiz->dir);
+    // Se for uma folha (sem filhos), verifica se é um caractere especial
+    // Se for uma folha contendo um caractere especial, conta como 2, se não conta como 1
+    if(raiz->esq == NULL && raiz->dir == NULL)
+    {
+
+        //recebe o valor do byte do noh
+        uchar no = *(uchar*)raiz->byte;
+
+        // se for uma folha contendo um dos sinais especiais, conta como 2
+        if(no == '*' || no == '\\'){
+            return 2 + calcular_tamanho_arvore(raiz->esq) + calcular_tamanho_arvore(raiz->dir); 
+        }
+        else{
+            //se for uma folha normal, conta como 1
+            return 1 + calcular_tamanho_arvore(raiz->esq) + calcular_tamanho_arvore(raiz->dir); 
+        }
+    }
+    
+    // Se não for folha, continuamos a percorrer a árvore, conta 1 para o nó atual e soma os tamanhos das subárvores esquerda e direita
+    return 1 +  calcular_tamanho_arvore(raiz->esq) + calcular_tamanho_arvore(raiz->dir);
 }
 //Serve para colocar a extensao .huff no arquivo
 char* adicionar_extensao(const char* nome_base, const char* extensao) {

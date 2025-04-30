@@ -28,7 +28,7 @@ int main() {
            
            descompactarPrincipal();
 
-        }else{
+        }else if (opcao < 1 || opcao > 3){
             printf("opcao invalida\n");
         }
 
