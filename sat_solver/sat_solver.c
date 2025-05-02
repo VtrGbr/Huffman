@@ -2,6 +2,8 @@
 COMO USAR??
 
 Basta colocar o arquivo cnf na mesma pasta que o sat solver compilado e executar
+
+
 ATENÇÃO: o formato precisa ser exatamente igual ao especificado pelo prof
 
 */
