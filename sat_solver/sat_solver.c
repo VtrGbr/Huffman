@@ -194,23 +194,23 @@ int resolver_sat(Arvr *no, CNF *problema, int solucao[]){
 
 
 int main(){
-    CNF problema = {0}; // Inicializa a estrutura do problema
-    ler_arquivo_cnf("problema.cnf", &problema); // Lê o arquivo cnf
+    CNF problema = {0}; //começa a estruturação do problema
+    ler_arquivo_cnf("problema.cnf", &problema); //lê o arquivo cnf
     
-    // Cria a raiz da árvore
+    //cria a raiz
     Arvr raiz = {0};
     raiz.esquerda = NULL;
     raiz.direita = NULL;
     
-    // Inicializa o array de atribuições com 0 (não atribuído)
+    //começa as atribuições
     for (int i = 0; i <= problema.num_literais; i++) {
         raiz.atribuicoes[i] = 0;
     }
     
-    // Array para guardar a solução
+    //guarda a solução
     int solucao[MAX_LIT] = {0};
     
-    // Tenta resolver o problema
+    //tenta resolver o problema
     if (resolver_sat(&raiz, &problema, solucao)) {
         printf("\n===== SATISFATIVEL! =====\n\n");
         printf("Solucao encontrada:\n");
