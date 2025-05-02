@@ -7,6 +7,7 @@ Lembrete: Você tem que ter um compilador para linguagem C
 Para rodar o compactador/descompactador de arquivos:
 1. entre na pasta huffman
 2. digite o comando: gcc compactar/compactar.c descompactar/descompactar.c main.c -o projeto
+3. rode o executavel passando o caminho do arquivo ( de preferencia que esteja na pasta huffman)
 obs: Caso seu compilador seja o g++, é so substituir "gcc" por "g++"
 
 Para rodar o código do seminário:
