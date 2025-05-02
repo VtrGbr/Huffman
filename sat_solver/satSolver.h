@@ -6,8 +6,8 @@
 #include <string.h>
 
 //definição dos maximos (mexer se o pc tankar)
-#define MAX_LIT 100
-#define MAX_CLAU 100
+#define MAX_LIT 500
+#define MAX_CLAU 500
 
 //definir termos
 #define SAT 1
@@ -38,7 +38,7 @@ typedef struct Arvr{
 } Arvr;
 
 
-//Funcao responsavel por ler o arquivo cnf
+//Funcao responsavel por ler o arquivo cnf e montar a estrura CNF
 void ler_arquivo_cnf(const char* nome_arquivo, CNF* problema);
 
 int resolver_cnf(CNF* problema, int atribuicoes[]);

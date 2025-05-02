@@ -95,65 +95,65 @@ int resolver_sat(Arvr *no, CNF *problema, int solucao[]){
 
     int estado =  resolver_cnf(problema, no->atribuicoes); //estado recebe sat, unsat ou indefinido (0, 1 ou 2)
 
-        if (estado == SAT) { //se o estado for sat, a solução foi encontrada
+    if (estado == SAT) { //se o estado for sat, a solução foi encontrada
         memcpy(solucao, no->atribuicoes, sizeof(int) * (problema->num_literais + 1)); //copia as atribuições para a solução
         return SAT; //retorna sat
-        }
-
-        if (estado == UNSAT) {//se o estado for unsat, volta pra árvore (backtracking)
-            return UNSAT; //insatisfatível
-        }
-
-        //aqui começa o uso de árvore (se o estado for indefinido)
-
-        //proximo passo - procurar a próxima variável a ser atribuida
-
-        int proxima_variavel = -1; //variável que vai ser atribuida (se for -1 vai terminar com a variável sendo indefinida (ou seja, unsat))
-        for (int i = 1; i <= problema->num_literais; i++) {
-            if (no->atribuicoes[i] == 0) { ////tenta procurar a proxima variável que não foi atribuida ainda
-                proxima_variavel = i;//
-                break;
-            }
-        }
-
-        if (proxima_variavel == -1) {
-            return UNSAT; //não tem mais variaveis pra atribuir (ou seja, todas foram atribuídas)
-        }
-
-        //tenta atribuir verdadeiro, fazendo um novo nó e atribuindo
-        Arvr *esq = malloc(sizeof(Arvr));
-        memcpy(esq->atribuicoes, no->atribuicoes, sizeof(int) * MAX_LIT);//copia as atribuições do nó atual para o novo nó
-        esq->atribuicoes[proxima_variavel] = 1;
-        esq->variavel = proxima_variavel;
-        esq->valor = 1;
-        esq->esquerda = NULL;
-        esq->direita = NULL;
-    
-        if (resolver_sat(esq, problema, solucao)) {//aqui vem a recursão pra resolver o problema com árvore
-        free(esq);
-        return SAT;
-        }
-
-        //tenra atribuir falso, fazendo um novo nó e atribuindo
-        Arvr *dir = malloc(sizeof(Arvr));
-        memcpy(dir->atribuicoes, no->atribuicoes, sizeof(int) * MAX_LIT);//copia as atribuições do nó atual para o novo nó
-        dir->atribuicoes[proxima_variavel] = -1;
-        dir->variavel = proxima_variavel;
-        dir->valor = -1;
-        dir->esquerda = NULL;
-        dir->direita = NULL;
-    
-        if (resolver_sat(dir, problema, solucao)) {
-        free(dir);
-        return SAT;
-        }
-    
-        //se nenhuma atribuição funcionar, volta pra árvore (backtracking)
-        free(esq);
-        free(dir);
-        return UNSAT;
-
     }
+
+    if (estado == UNSAT) {//se o estado for unsat, volta pra árvore (backtracking)
+        return UNSAT; //insatisfatível
+    }
+
+    //aqui começa o uso de árvore (se o estado for indefinido)
+
+    //proximo passo - procurar a próxima variável a ser atribuida
+
+    int proxima_variavel = -1; //variável que vai ser atribuida (se for -1 vai terminar com a variável sendo indefinida (ou seja, unsat))
+    for (int i = 1; i <= problema->num_literais; i++) {
+        if (no->atribuicoes[i] == 0) { ////tenta procurar a proxima variável que não foi atribuida ainda
+            proxima_variavel = i;//
+            break;
+        }
+    }
+
+    if (proxima_variavel == -1) {
+        return UNSAT; //não tem mais variaveis pra atribuir (ou seja, todas foram atribuídas)
+    }
+
+    //tenta atribuir verdadeiro, fazendo um novo nó e atribuindo
+    Arvr *esq = malloc(sizeof(Arvr));
+    memcpy(esq->atribuicoes, no->atribuicoes, sizeof(int) * MAX_LIT);//copia as atribuições do nó atual para o novo nó
+    esq->atribuicoes[proxima_variavel] = 1;
+    esq->variavel = proxima_variavel;
+    esq->valor = 1;
+    esq->esquerda = NULL;
+    esq->direita = NULL;
+
+    if (resolver_sat(esq, problema, solucao)) {//aqui vem a recursão pra resolver o problema com árvore
+        free(esq);
+        return SAT;
+    }
+
+    //tenra atribuir falso, fazendo um novo nó e atribuindo
+    Arvr *dir = malloc(sizeof(Arvr));
+    memcpy(dir->atribuicoes, no->atribuicoes, sizeof(int) * MAX_LIT);//copia as atribuições do nó atual para o novo nó
+    dir->atribuicoes[proxima_variavel] = -1;
+    dir->variavel = proxima_variavel;
+    dir->valor = -1;
+    dir->esquerda = NULL;
+    dir->direita = NULL;
+
+    if (resolver_sat(dir, problema, solucao)) {
+        free(dir);
+        return SAT;
+    }
+
+    //se nenhuma atribuição funcionar, volta pra árvore (backtracking)
+    free(esq);
+    free(dir);
+    return UNSAT;
+
+}
 
 
 
