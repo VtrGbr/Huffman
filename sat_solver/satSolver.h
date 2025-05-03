@@ -1,5 +1,5 @@
 #ifndef satSolver_h
-#define satSolver_
+#define satSolver_h
 
 #include <stdio.h>
 #include <stdlib.h>
