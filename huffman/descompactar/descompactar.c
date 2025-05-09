@@ -324,10 +324,16 @@ void descompactarPrincipal()
 
     // Continua com a execução da função se o arquivo foi encontrado
     arquivo_saida = remover_huff(nome);
+
     unsigned int tamanho_lixo = obter_tamanho_lixo(arquivo_entrada);
     unsigned int tamanho_arvore = obter_tamanho_arvore(arquivo_entrada);
+
+    //Vamos transformar a arvore seriado do arquivo, em uma arvore binaria
     no_t *arvore_huff = obter_arvore(arquivo_entrada, tamanho_arvore);
+
+    //Aqui vamos descompactar o arquivo
     descompactar(arquivo_entrada, tamanho_lixo, tamanho_arvore, arvore_huff, arquivo_saida);
+
     liberar_arvore(arvore_huff);
     fclose(arquivo_entrada);
     fclose(arquivo_saida);

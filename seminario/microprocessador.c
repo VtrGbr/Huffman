@@ -99,12 +99,12 @@ void ISR_temperatura_critica(Fila* fila) {
 
 void ISR_queda_energia(Fila* fila) {
     printf("[ISR] Queda de Energia detectada!\n");
-    adicionar_evento(fila, criar_evento("Queda de Energia", 2));
+    adicionar_evento(fila, criar_evento("Queda de Energia", 3));
 }
 
 void ISR_manutencao_preventiva(Fila* fila) {
     printf("[ISR] Manutenção Preventiva necessária.\n");
-    adicionar_evento(fila, criar_evento("Problemas de Manutenção", 3));
+    adicionar_evento(fila, criar_evento("Problemas de Manutenção", 4));
 }
 
 void ISR_LedApagando(Fila* fila) {
