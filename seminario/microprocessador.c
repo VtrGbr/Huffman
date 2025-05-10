@@ -86,7 +86,7 @@ void liberar_fila(Fila* fila) {
     free(fila);
 }
 
-// ---------- Simulando as Interrupções (ISRs) ----------
+// ---------- Simulando as Interrupções (ISRs) ---------- funcoes para adicionar na fila
 void ISR_botao_emergencia(Fila* fila) {
     printf("[ISR] Botão de Emergência acionado!\n");
     adicionar_evento(fila, criar_evento("Botão de Emergência", 1));
@@ -173,7 +173,9 @@ void tratar_eventos(Fila* fila) {
                 getchar(); // limpar '\n'
     
                 if (resposta == 's' || resposta == 'S') {
-                    simular_ISR_durante_tratamento(fila);
+                    /*Nesta funcao ele vai perguntar qual interrupcao voce deseja fazer e adiciona essa 
+                    interrupcao na fila*/
+                    simular_ISR_durante_tratamento(fila); 
     
                     // Checa se há um evento de prioridade maior
                     if (fila->inicio && fila->inicio->prioridade < atual->prioridade) {
