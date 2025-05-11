@@ -33,6 +33,8 @@ int main() {
         }
 
     } while (opcao != 3);
+
+    printf("Encerrando programa.\n");
     
     return 0;
 }
