@@ -1,5 +1,3 @@
-Claro! Aqui está uma versão melhorada do seu README, utilizando Markdown para uma melhor formatação, clareza e profissionalismo.
-
 Projeto de Estrutura de Dados: Compactador de Arquivos
 Este repositório contém um projeto desenvolvido para a disciplina de Estrutura de Dados. O projeto principal consiste na implementação do algoritmo de Huffman para compactação e descompactação de arquivos. Além disso, inclui códigos auxiliares para um seminário e para a plotagem de dados de desempenho.
 
